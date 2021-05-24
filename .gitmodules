@@ -1,0 +1,3 @@
+[submodule "src/SCLUK"]
+	path = src/SCLUK
+	url = git@github.com:circled-square/SCLUK.git
