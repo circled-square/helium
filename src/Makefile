@@ -2,8 +2,9 @@
 CXX = g++
 PKGS = portaudio-2.0 glew sdl2 SDL2_ttf SDL2_image
 LIBS = `pkg-config $(PKGS) --libs` -lboost_fiber -lpthread
-OUTFILE = -o../out
-GENERAL_FLAGS = -fno-rtti -std=c++20 -Wall -Wextra
+OUTDIR = `pwd`/..
+OUTFILE = -o$(OUTDIR)/out
+GENERAL_FLAGS = -fno-rtti -std=c++20 -Wall -Wextra -DEXECUTABLE_DIR=\"$(OUTDIR)\"
 INCLUDE_PATHS = -ISCLUK/include/ `pkg-config $(PKGS) --cflags-only-I`
 
 #indirectly used

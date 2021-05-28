@@ -7,3 +7,4 @@
 -Wno-vla
 -Wno-vla-extension
 -ISCLUK/include/
+-DEXECUTABLE_DIR="executable directory set at compile time from Makefile"

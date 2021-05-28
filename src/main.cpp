@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cassert>
 #include <complex>
+#include <filesystem>
 
 #include <csignal>
 #include <boost/fiber/buffered_channel.hpp>
@@ -17,6 +18,8 @@
 
 int main() {
     using namespace scluk::language_extension;
+
+    std::filesystem::current_path(EXECUTABLE_DIR);
 
     audio::sliding_dft dft;
     audio::duplex_chan cb_chan;
