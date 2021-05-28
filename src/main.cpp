@@ -4,7 +4,7 @@
 #include <complex>
 #include <filesystem>
 
-#include <csignal>
+#include <signal.h>
 #include <boost/fiber/buffered_channel.hpp>
 
 #include <scluk/language_extension.hpp>
