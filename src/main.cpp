@@ -11,6 +11,7 @@
 #include <scluk/math.hpp>
 #include <scluk/array.hpp>
 #include <scluk/functional.hpp>
+#include <scluk/sliding_queue.hpp>
 
 #include "dft/sliding_dft.hpp"
 #include "sdl_gui_thread.hpp"
@@ -33,9 +34,11 @@ int main() {
         gui_thread.data.do_exit = true;
     }));
 
+
+    scluk::sliding_queue<audio::ift_chunk, audio::ift_overlap> ift_queue;
     //first iteration, just to populate the arrays
     dft.push_frames(cb_chan.cb_to_main.value_pop());
-    audio::dft_array phase_adjusted_dft(dft.clone()), old_dft(dft.clone());
+    audio::dft_array phase_adjusted_dft(dft), old_dft(dft);
 
     //main loop
     while(!gui_thread.data.do_exit) {
@@ -57,14 +60,25 @@ int main() {
             phase_adjusted_dft[i] = std::polar(A0, p0_adj);
         }
 
-        //calculate the inverse fourier transform
-        audio::frame_chunk frames = phase_adjusted_dft.ifft<audio::ft_dist>(pitch_mul);
+        //calculate the latest ift, apply the hann window and enqueue it
+        ift_queue << scluk::math::hann_window(phase_adjusted_dft.ifft<audio::ft_win>(pitch_mul));
+
+        audio::frame_chunk frames(0.f);
+
+        for(u64 n : index(ift_queue)) {
+            u64 starting_index = (audio::ift_overlap-1 - n) * audio::ft_dist;
+
+            for(u64 i : range(audio::ft_dist))
+                frames[i] += ift_queue[n][starting_index + i];
+        }
 
         //send the frames to the callback
-        cb_chan.main_to_cb.push(std::move(frames));
+        if(gui_thread.data.do_output_audio)
+            cb_chan.main_to_cb.push(std::move(frames));
+        else cb_chan.main_to_cb.push(audio::frame_chunk(0.f));
 
         //send the old dft to the gui and repopulate it
         gui_thread.channel.try_push(std::move(old_dft));
-        old_dft = dft.clone();
+        old_dft = dft;
     }
 }
