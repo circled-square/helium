@@ -48,14 +48,14 @@ namespace dft {
 
     // Cooley–Tukey FFT (in-place, divide-and-conquer)
     template<typename T>
-    std::valarray<std::complex<T>> fft(std::valarray<std::complex<T>>&& x) {
+    std::valarray<std::complex<T>> fft(std::valarray<std::complex<T>> x) {
         detail::in_place_fft(x);
         return x;
     }
 
     // inverse fft (in-place)
     template<typename T>
-    std::valarray<std::complex<T>> ifft(std::valarray<std::complex<T>>&& x) {
+    std::valarray<std::complex<T>> ifft(std::valarray<std::complex<T>> x) {
         detail::in_place_ifft(x);
         return x;
     }
