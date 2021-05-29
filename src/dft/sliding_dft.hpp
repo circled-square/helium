@@ -29,8 +29,10 @@ namespace dft {
         constexpr T get_frequency_hz(u32 i, u32 rate) const 		{ return get_frequency_per_frame(i) * T(rate); }
         constexpr T get_seconds_per_period(u32 i, u32 rate) const	{ return get_frames_per_period(i) / T(rate); }
 
-        dft_array(dft_array&& o) : heap_array<std::complex<T>, N>(std::move(o)) {}
         dft_array() : heap_array<std::complex<T>, N>() {}
+        dft_array(dft_array&& o) : heap_array<std::complex<T>, N>(std::move(o)) {}
+        dft_array(dft_array& o) : heap_array<std::complex<T>, N>(o) {}
+
 
         template<u64 ret_len>
         heap_array<T, ret_len> ifft(f32 pitch_factor) {
