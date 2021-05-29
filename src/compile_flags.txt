@@ -2,6 +2,7 @@
 -Weverything
 -Wno-c++17-extensions
 -Wno-c++98-compat
+-Wno-c++98-compat-pedantic
 -Wno-c++98-c++11-c++14-c++17-compat-pedantic
 -Wno-zero-as-null-pointer-constant
 -Wno-vla
