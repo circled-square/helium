@@ -28,7 +28,6 @@ class sdl_gui_thread : std::jthread {
     audio::dft_array hrm_arr;
 
     void run() {
-        namespace sdl = sdl;
         using namespace std::chrono_literals;
 
         sdl::window win("phase vocoder", { 1000, 540 });
@@ -43,6 +42,7 @@ class sdl_gui_thread : std::jthread {
 
                 //find amplitude and freq of main harmonic
                 const u64 N = hrm_arr.size()/2;
+
                 u64 max_index = 0;
                 f32 max_norm = 0.f;
                 for(u64 i : range(N))
