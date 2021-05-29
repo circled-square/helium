@@ -57,8 +57,8 @@ namespace dft {
             this->arr_ptr = std::move(o.arr_ptr); 
             return *this;
         }
-        template<scluk::concepts::collection collection_t>
-        dft_array& operator=(const collection_t& o) { 
+        template<scluk::concepts::iterable iterable_t>
+        dft_array& operator=(const iterable_t& o) { 
             assert(o.size() == this->size());
             if(!*this) *this = dft_array();
             std::copy(o.begin(), o.end(), this->begin());
