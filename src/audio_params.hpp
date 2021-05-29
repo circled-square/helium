@@ -10,12 +10,21 @@
 
 namespace audio {
     using scluk::u64, scluk::f32, scluk::heap_array;
+    #ifndef LOWER_PERFORMANCE_MODE
+    constexpr u64 rate = 44100;
+    constexpr u64 ft_win = 2048;
+    constexpr u64 ift_overlap = 4;
+    constexpr u64 ft_dist = ft_win / ift_overlap;
+    #else
     constexpr u64 rate = 10000;
     constexpr u64 ft_win = 512;
-    constexpr u64 ft_dist = rate / 50;
+    constexpr u64 ift_overlap = 4;
+    constexpr u64 ft_dist = ft_win / ift_overlap;
+    #endif
     using sliding_dft = dft::sliding_dft<f32, ft_win>;
     using dft_array = sliding_dft::dft_array;
     using frame_chunk = scluk::heap_array<f32, ft_dist>;
+    using ift_chunk = scluk::heap_array<f32, ft_win>;
     using gui_simplex_chan = boost::fibers::buffered_channel<dft_array>;
 
     static_assert(std::has_single_bit(ft_win), "ft_win must be a power of two to allow us to use cooley-tukey ifft");
