@@ -38,31 +38,33 @@ class sdl_gui_thread : std::jthread {
         win.set_text_color(sdl::color::black, bg);
 
         win.set_draw_cb([this, &font, bg](sdl::window& w) {
-            w.clear(bg);
+            if(channel.try_pop(hrm_arr) == boost::fibers::channel_op_status::success) {
+                w.clear(bg);
 
-            if(channel.try_pop(hrm_arr) != boost::fibers::channel_op_status::success) return;
-            //find amplitude and freq of main harmonic
-            u64 max_index = 0;
-            f32 max_norm = 0.f;
-            for(u64 i : range(hrm_arr.size()/2))
-                if(f32 norm = std::norm(hrm_arr[i]); norm > max_norm) {
-                    max_norm = norm;
-                    max_index = i;
+                //find amplitude and freq of main harmonic
+                const u64 N = hrm_arr.size()/2;
+                u64 max_index = 0;
+                f32 max_norm = 0.f;
+                for(u64 i : range(N))
+                    if(f32 norm = std::norm(hrm_arr[i]); norm > max_norm) {
+                        max_norm = norm;
+                        max_index = i;
+                    }
+                f32 max_ampl = std::abs(hrm_arr[max_index]);
+                //draw the spectrum
+                i32 min_y = 60;
+                i32 max_y = w.res.y-10;
+                f32 max_h = std::max(f32(max_y - min_y), 0.f);
+                sdl::rect r { .x = 0, .y = max_y, .w = std::max(1, (w.res.x-20) / i32(N)), .h = 0 };
+
+                for(u64 i : range(hrm_arr.size()/2)) {
+                    r.h = -std::min(i32(max_h), i32(max_h * std::abs(hrm_arr[i]) / max_ampl));
+                    r.x = 10 + i32(i) * r.w;
+                    if(r.x > w.res.x - 10) break;
+                    w.set_draw_color(i%2 ? sdl::color(0x7a, 0x9e, 0xb7, 0xff) : sdl::color(0x7a, 0x76, 0xb7, 0xff));
+                    w.draw_rect(r);
                 }
-            f32 max_ampl = std::abs(hrm_arr[max_index]);
-            //draw the spectrum
-            i32 min_y = 60;
-            i32 max_y = w.res.y-10;
-            f32 max_h = std::max(f32(max_y - min_y), 0.f);
-            sdl::rect r { .x = 0, .y = max_y, .w = (w.res.x-20) / i32(hrm_arr.size()/2), .h = 0 };
-
-            for(u64 i : range(hrm_arr.size()/2)) {
-                r.h = -std::min(i32(max_h), i32(max_h * std::abs(hrm_arr[i]) / max_ampl));
-                r.x = 10 + i32(i) * r.w;
-                w.set_draw_color(i%2 ? sdl::color(0x7a, 0x9e, 0xb7, 0xff) : sdl::color(0x7a, 0x76, 0xb7, 0xff));
-                w.draw_rect(r);
             }
-
             //draw text
             auto yn = [](bool b) -> const char* { return b ? "yes" : "no"; };
             w.draw_text(font, 
