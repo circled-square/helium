@@ -11,12 +11,11 @@
 using namespace scluk::language_extension;
 
 class sdl_gui_thread : std::jthread {
-    i32 pitch_change = 12;
 
     public:
     struct gui_info_t { 
         bool do_output_audio = true, do_apply_effect = false, do_print = false, do_exit = false;
-        f32 pitch_mul = 2.f;
+        i32 pitch = 12;
         gui_info_t(){}
     } data;
 
@@ -69,7 +68,7 @@ class sdl_gui_thread : std::jthread {
             auto yn = [](bool b) -> const char* { return b ? "yes" : "no"; };
             w.draw_text(font, 
                 sout("[P] Printing: %\n[A] Audio output: %\n[F] Effect: %; %% semitones",  
-                yn(data.do_print), yn(data.do_output_audio), yn(data.do_apply_effect), pitch_change < 0 ? "-" : "+", abs(pitch_change)), 
+                yn(data.do_print), yn(data.do_output_audio), yn(data.do_apply_effect), data.pitch < 0 ? "-" : "+", abs(data.pitch)), 
                 { 20, 10 });
         });
 
@@ -101,17 +100,13 @@ class sdl_gui_thread : std::jthread {
                     break;
                 case SDLK_RIGHT:
                 case SDLK_KP_6:
-                    if(e.type == SDL_KEYDOWN) {
-                        pitch_change++;
-                        data.pitch_mul = std::pow(2.f, f32(pitch_change)/12.f);
-                    }
+                    if(e.type == SDL_KEYDOWN)
+                        data.pitch++;
                     break;
                 case SDLK_LEFT:
                 case SDLK_KP_4:
-                    if(e.type == SDL_KEYDOWN) {
-                        pitch_change--;
-                        data.pitch_mul = std::pow(2.f, f32(pitch_change)/12.f);
-                    }
+                    if(e.type == SDL_KEYDOWN)
+                        data.pitch--;
                     break;
             }
         });
