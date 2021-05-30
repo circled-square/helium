@@ -11,8 +11,8 @@
 namespace audio {
     using scluk::u64, scluk::f32, scluk::heap_array;
     #ifndef LOWER_PERFORMANCE_MODE
-    constexpr u64 rate = 44100;
-    constexpr u64 ft_win = 2048;
+    constexpr u64 ft_win = 1024;
+    constexpr u64 rate = ft_win*50;//~40-50k
     constexpr u64 ift_overlap = 4;
     constexpr u64 ft_dist = ft_win / ift_overlap;
     #else
