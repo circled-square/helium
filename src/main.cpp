@@ -22,10 +22,6 @@ int main() {
 
     std::filesystem::current_path(EXECUTABLE_DIR);
 
-    audio::sliding_dft dft;
-    audio::duplex_chan cb_chan;
-    portaudio::async_stream stream({ .frames_per_buffer=audio::ft_dist, .rate=audio::rate, .log="log.txt" }, audio::cb, cb_chan);
-
     sdl_gui_thread gui_thread;
 
 	//interrupt signal handling
@@ -34,6 +30,9 @@ int main() {
         gui_thread.data.do_exit = true;
     }));
 
+    audio::sliding_dft dft;
+    audio::duplex_chan cb_chan;
+    portaudio::async_stream stream({ .frames_per_buffer=audio::ft_dist, .rate=audio::rate, .log="log.txt" }, audio::cb, cb_chan);
 
     scluk::sliding_queue<audio::ift_chunk, audio::ift_overlap> ift_queue;
     //first iteration, just to populate the arrays
@@ -43,28 +42,28 @@ int main() {
     //main loop
     while(!gui_thread.data.do_exit) {
         //push the frames received from portaudio
-        dft.push_frames(cb_chan.cb_to_main.value_pop());
+        dft.push_frames_fft(cb_chan.cb_to_main.value_pop());
 
-        const f32 pitch_mul = gui_thread.data.do_apply_effect ? gui_thread.data.pitch_mul : 1.f;
-
+        const f32 pitch_mul = gui_thread.data.do_apply_effect ? std::pow(2.f, f32(gui_thread.data.pitch)/12.f) : 1.f;
         //phase adjustment to avoid artifacts (this is what makes this a phase vocoder)
         for(u64 i : index(dft)) {
             using std::abs, std::arg;
-            using namespace scluk::math_literals;
+            using scluk::math::pi;
 
-            //0 means new harmonic, 1 means old, p means phase, A means amplitude
-            const f32 p0 = arg(dft[i]), p1 = arg(old_dft[i]), 
-                      p1_adj = arg(phase_adjusted_dft[i]), A0 = abs(dft[i]);
+            //p means phase, A means amplitude
+            const f32 p_new = arg(dft[i]), p_old = arg(old_dft[i]), 
+                      p_old_adj = arg(phase_adjusted_dft[i]), A_new = abs(dft[i]);
 
-            const f32 unwrap_addend = 2_pi_f * f32(i / audio::ift_overlap);//integer division allows me to automatically floor without additional cost
+            //integer division allows me to automatically floor without additional cost
+            const f32 unwrap_addend = 2.f*pi * f32(i / audio::ift_overlap);
 
-            const f32 raw_p_delta = p0 - p1;
-            const f32 mod_p_delta = raw_p_delta + std::signbit(raw_p_delta) * 2_pi_f;
+            const f32 raw_p_delta = p_new - p_old;
+            const f32 mod_p_delta = raw_p_delta + std::signbit(raw_p_delta) * 2.f*pi;
 
             const f32 adj_p_delta = (unwrap_addend + mod_p_delta) * pitch_mul;
-            const f32 p0_adj = p1_adj + adj_p_delta;
+            const f32 p_new_adj = p_old_adj + adj_p_delta;
 
-            phase_adjusted_dft[i] = std::polar(A0, p0_adj);
+            phase_adjusted_dft[i] = std::polar(A_new, p_new_adj);
         }
 
         //calculate the latest ift, apply the hann window and enqueue it
