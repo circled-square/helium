@@ -50,12 +50,19 @@ int main() {
         //phase adjustment to avoid artifacts (this is what makes this a phase vocoder)
         for(u64 i : index(dft)) {
             using std::abs, std::arg;
+            using namespace scluk::math_literals;
 
             //0 means new harmonic, 1 means old, p means phase, A means amplitude
             const f32 p0 = arg(dft[i]), p1 = arg(old_dft[i]), 
                       p1_adj = arg(phase_adjusted_dft[i]), A0 = abs(dft[i]);
-            const f32 p_delta = (p0 - p1) * pitch_mul;
-            const f32 p0_adj = p1_adj + p_delta;
+
+            const f32 unwrap_addend = 2_pi_f * f32(i / audio::ift_overlap);//integer division allows me to automatically floor without additional cost
+
+            const f32 raw_p_delta = p0 - p1;
+            const f32 mod_p_delta = raw_p_delta + std::signbit(raw_p_delta) * 2_pi_f;
+
+            const f32 adj_p_delta = (unwrap_addend + mod_p_delta) * pitch_mul;
+            const f32 p0_adj = p1_adj + adj_p_delta;
 
             phase_adjusted_dft[i] = std::polar(A0, p0_adj);
         }
