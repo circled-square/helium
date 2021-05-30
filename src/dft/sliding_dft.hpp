@@ -116,9 +116,21 @@ namespace dft {
         }
         void push_frame(T new_frame) { push_frame(std::complex<T>(new_frame, 0.)); }
 
-        void push_frames(const auto& frames) {
+        template<scluk::concepts::iterable iterable_t>
+        void push_frames(const iterable_t& frames) {
             for(auto frame : frames)
                 push_frame(frame);
+        }
+
+        template<scluk::concepts::iterable iterable_t>
+        void push_frames_fft(const iterable_t& frames) {
+            for(const auto& frame : frames) queue.push(frame);
+
+            std::valarray<std::complex<T>> in(queue.size());
+            std::copy(std::begin(queue), std::end(queue), std::begin(in));
+
+            std::valarray<std::complex<T>> out = fft(scluk::math::hann_window(std::move(in));
+            std::copy(std::begin(out), std::end(out), this->begin());
         }
     };
 }
