@@ -13,7 +13,6 @@
 #include <vector>
 #include <optional>
 #include <scluk/language_extension.hpp>
-//#include <scluk/silence_warning.hpp>
 
 namespace sdl {
   using namespace scluk::language_extension;
@@ -21,9 +20,9 @@ namespace sdl {
   struct color : public SDL_Color {
     color() : SDL_Color() { }
     color(u8 r, u8 g, u8 b, u8 a) : SDL_Color({r,g,b,a}) { }
-    color(const SDL_Color& other) : SDL_Color(other) { }
-    color(const color& other) : color() { operator=(other); }
-    color& operator=(const color& o) {
+    color(SDL_Color other) : SDL_Color(other) { }
+    color(const color& other) : SDL_Color(other) { }
+    color& operator=(color o) {
       r = o.r;
       g = o.g;
       b = o.b;
