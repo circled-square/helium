@@ -34,7 +34,7 @@ int main() {
     audio::duplex_chan cb_chan;
     portaudio::async_stream stream({ .frames_per_buffer=audio::ft_dist, .rate=audio::rate, .log="log.txt" }, audio::cb, cb_chan);
 
-    scluk::sliding_queue<audio::ift_chunk, audio::ift_overlap> ift_queue;
+    scluk::sliding_queue<audio::ift_chunk, audio::ift_overlap> ift_queue(audio::ift_chunk(0.f));
     //first iteration, just to populate the arrays
     dft.push_frames(cb_chan.cb_to_main.value_pop());
     audio::dft_array phase_adjusted_dft(dft), old_dft(dft);
