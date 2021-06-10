@@ -1,2 +1,2 @@
 # helium
-phase vocoder implementation based on a recursive sliding window dft in c++
+Phase Vocoder implementation based on a recursive STFT in C++
