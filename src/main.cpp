@@ -32,7 +32,7 @@ int main() {
 
     audio::sliding_dft dft;
     audio::duplex_chan cb_chan;
-    portaudio::async_stream stream({ .frames_per_buffer=audio::ft_dist, .rate=audio::rate, .log="log.txt" }, audio::cb, cb_chan);
+    portaudio::async_stream stream({ .frames_per_buffer=audio::ft_dist, .rate=audio::rate, .log=EXECUTABLE_DIR"/log.txt" }, audio::cb, cb_chan);
 
     scluk::sliding_queue<audio::ift_chunk, audio::ift_overlap> ift_queue(audio::ift_chunk(0.f));
     //first iteration, just to populate the arrays
