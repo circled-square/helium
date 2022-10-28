@@ -129,7 +129,7 @@ namespace dft {
             std::valarray<std::complex<T>> in(queue.size());
             std::copy(std::begin(queue), std::end(queue), std::begin(in));
 
-            std::valarray<std::complex<T>> out = fft(scluk::math::hann_window(std::move(in));
+            std::valarray<std::complex<T>> out = fft(scluk::math::hann_window(std::move(in)));
             std::copy(std::begin(out), std::end(out), this->begin());
         }
     };

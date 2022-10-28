@@ -53,8 +53,8 @@ namespace sdl {
     */
     T x, y;
 
-    point<T>(T x, T y) : x(x), y(y) { }
-    point<T>() { }
+    point(T x, T y) : x(x), y(y) { }
+    point() { }
     template <typename target_t> 
     operator point<target_t>() const {
       return { static_cast<target_t>(x), static_cast<target_t>(y) };
@@ -64,7 +64,7 @@ namespace sdl {
     }
     
     template <typename distance_t, typename angle_t> 
-    inline point<T> get_point_at(distance_t distance, angle_t degrees) const noexcept {//utility function to avoid duplication of code. Returns the coordinates of the point at a certain angle and at a certain distance
+    inline point get_point_at(distance_t distance, angle_t degrees) const noexcept {//utility function to avoid duplication of code. Returns the coordinates of the point at a certain angle and at a certain distance
       angle_t& angle = (degrees*=0.0174532925199);//convert from degrees to radians 
       return {
         this->x + distance * cos(angle),
